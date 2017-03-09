@@ -139,7 +139,7 @@ var app = {
     };
 	
 	backgroundGeolocation.configure(callbackFn, failureFn, {
-		debug: true,
+		//debug: true,
 		desiredAccuracy: 10,
 		stationaryRadius: 20,
 		distanceFilter: 30,
