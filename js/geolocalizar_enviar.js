@@ -52,7 +52,7 @@ function Resp_enviar_geo(tx, results) {
 		fecha_captura = results.rows.item(i).fecha_captura; //console.log("Fecha Cap: " +fecha_captura);
 		
 		var parametros = new Object();
-			parametros['imei'] = imei;
+			parametros['imei'] = app.imei;
 			parametros['longitud'] = longitud;
 			parametros['latitud'] = latitud;
 			parametros['exactitud'] = exactitud;
