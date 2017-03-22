@@ -41,28 +41,28 @@ function Resp_enviar_geo(tx, results) {
 	
 	//NÚMERO DE REGISTROS
     var len = results.rows.length;		//console.log("NÚMERO DE REGISTROS: "+len);					
-	for (i = 0; i < len; i++){ 
+	for (i = 0; i < len; i++){		//console.log("Envía los registros de primer plano: IMEI => "+app.imei)
 		//id_t_usuario = results.rows.item(i).id_t_usuario; console.log(id_t_usuario);
 		longitud = results.rows.item(i).longitud; 
 		latitud = results.rows.item(i).latitud; 
 		exactitud = results.rows.item(i).exactitud; 
 		velocidad = results.rows.item(i).velocidad;
-		direccion = results.rows.item(i).direccion;
-		//console.log(longitud + " " +latitud+"; Exact: "+exactitud+"; Vel.: "+velocidad+"; Dir: "+direccion);
+		direccion = results.rows.item(i).direccion;		//console.log(longitud + " " +latitud+"; Exact: "+exactitud+"; Vel.: "+velocidad+"; Dir: "+direccion);
 		fecha_captura = results.rows.item(i).fecha_captura; //console.log("Fecha Cap: " +fecha_captura);
 		
-		var parametros = new Object();
-			parametros['imei'] = app.imei;
-			parametros['longitud'] = longitud;
-			parametros['latitud'] = latitud;
-			parametros['exactitud'] = exactitud;
-			parametros['velocidad'] = velocidad;
-			parametros['direccion'] = direccion;		
-			parametros['fechacaptura'] = fecha_captura;
-			parametros['tipo'] = '2';
-			//console.log(parametros);
-		app.enviar(parametros);	
-
+		if(app.imei != ""){
+			var parametros = new Object();
+				parametros['imei'] = app.imei;
+				parametros['lon'] = longitud;
+				parametros['lat'] = latitud;
+				parametros['exac'] = exactitud;
+				parametros['vel'] = velocidad;
+				parametros['dir'] = direccion;		
+				parametros['fechacaptura'] = fecha_captura;
+				parametros['tipo'] = '2';
+				//console.log(parametros);
+			app.enviar(parametros);	
+		}else console.log("SIN IMEI: tipo 2");
 	}
 }
 
@@ -71,5 +71,5 @@ function RegError(){
 }
 
 /*	Envía cada 2 segundos las coordenadas pendientes */
-setInterval(function(){db.transaction(enviar_geo);}, 10000);
+setInterval(function(){db.transaction(enviar_geo);}, 10*1000);
 

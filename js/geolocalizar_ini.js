@@ -9,20 +9,21 @@ var options = { maximumAge: 60000*1, timeout: 10000, enableHighAccuracy: true };
 
 var success = function(pos) {
 	 myLatitud = pos.coords.latitude;		var buscar_myLatitud = myLatitud.toString().substring(0, 5);		//console.log(buscar_myLatitud);
-	 myLongitud = pos.coords.longitude;		var buscar_myLongitud = myLongitud.toString().substring(0, 7);		//console.log(buscar_myLongitud);
+	 myLongitud = pos.coords.longitude;		var buscar_myLongitud = myLongitud.toString().substring(0, 7);		
 	 myPrecision = pos.coords.accuracy;
 	 speed = pos.coords.speed; 		if(speed == null) speed = "";
 	 heading = pos.coords.heading;	if(heading == null) heading = "";		 	//text = "<div>Latitude: " + myLatitud + "<br/>" + "Longitude: " + myLongitud + "<br/>" + "Accuracy: " + myPrecision + " m<br/>" + "</div>";
+	//console.log("TIPO 2: "+myLatitud + ' / ' + myLatitud + ' / ' + myPrecision + ' / ' + heading) ;
 	 
 	var now = new Date();
 	var timestamp    = now.getFullYear()+'-'+(1+now.getMonth())+'-'+now.getDate()+'-'+now.getHours()+'_'+now.getMinutes()+'_'+now.getSeconds();
 	var SQLtimestamp = now.getFullYear()+'-'+(1+now.getMonth())+'-'+now.getDate()+'-'+now.getHours();	//FECHA Y HORA 2014-11-10-10
 	 
-	var parentElement = document.getElementById('deviceready');
+/*	var parentElement = document.getElementById('deviceready');
 	var ubicandoElement = parentElement.querySelector('.ubicando');
 	var georeferenciadoElement = parentElement.querySelector('.georeferenciado');
 	ubicandoElement.setAttribute('style', 'display:none;');
-	georeferenciadoElement.setAttribute('style', 'display:block;');
+	georeferenciadoElement.setAttribute('style', 'display:block;'); */
 	 
 	function errorInsert(err) {		console.log('Error en consulta!!!!!');	//alert("INSERT FALLÓ!");
 		// Esto se puede ir a un Log de Error dir�a el purista de la oficina, pero como este es un ejemplo pongo el MessageBox.Show :P
@@ -39,7 +40,7 @@ var success = function(pos) {
 	function TBLubicacion(tx) { //Si no existe crea la talba USUARIOS	//tx.executeSql('DELETE TABLE IF EXISTS "usuario"');
 		console.log('CREATE TABLE IF NOT EXISTS ubicacion ("longitud" TEXT,"latitud" TEXT,"exactitud" TEXT,"velocidad" TEXT,"direccion" TEXT,"fecha_captura" TEXT)');
 	    tx.executeSql('CREATE TABLE IF NOT EXISTS ubicacion ("longitud" TEXT,"latitud" TEXT,"exactitud" TEXT,"velocidad" TEXT,"direccion" TEXT,"fecha_captura" TEXT)');
-		if(myPrecision < 100){
+		if(myPrecision < 120){
 			db.transaction(function(tx) { //console.log('SELECT * FROM ubicacion  where fecha_captura like "'+SQLtimestamp+'%" and latitud like "'+buscar_myLatitud+'%" and longitud like "'+buscar_myLongitud+'%";');
 			   tx.executeSql('SELECT * FROM ubicacion  where fecha_captura like "'+SQLtimestamp+'%" and latitud like "'+buscar_myLatitud+'%" and longitud like "'+buscar_myLongitud+'%";', [],
 			     function(tx, result) {
@@ -51,9 +52,9 @@ var success = function(pos) {
 			     },errorInsert);
 			 },errorInsert,successInsert);
 		}
-	}	//console.log("Presición: "+myPrecision);
+	}	//console.log("TIPO 2: Presición: "+myPrecision);
 	
-	if(myPrecision < 100){
+	if(myPrecision < 120){
 		db.transaction(function(tx) { //console.log('SELECT * FROM ubicacion  where fecha_captura like "'+SQLtimestamp+'%" and latitud like "'+buscar_myLatitud+'%" and longitud like "'+buscar_myLongitud+'%";');
 		   tx.executeSql('SELECT * FROM ubicacion  where fecha_captura like "'+SQLtimestamp+'%" and latitud like "'+buscar_myLatitud+'%" and longitud like "'+buscar_myLongitud+'%";', [],
 		     function(tx, result) {
@@ -75,4 +76,5 @@ var failw = function(error) {
 };
 
 //document.getElementById('search_cur_position').innerHTML = '<span class="glyphicon glyphicon-search"></span> Ubicando...';	//$("#id_tab4_geom").html('<span class="glyphicon glyphicon-search"></span> Ubicación');
-watchID = navigator.geolocation.watchPosition(success, failw, options);
+console.log("Inicia Navegación getCurrentPosition geoHTML - Primer plano");
+watchID = navigator.geolocation.getCurrentPosition(success, failw, options);

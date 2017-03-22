@@ -21,28 +21,12 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
-		try {
-			var permissions = cordova.plugins.permissions;
-			permissions.hasPermission(permissions.READ_PHONE_STATE, checkPermissionCallback, null);
-		}
-		catch(err) {
-		    console.log(err.message);
-		}
-		function checkPermissionCallback(status) {
-		  if(!status.hasPermission) {
-			var errorCallback = function() {
-			  console.warn('No tiene permisos de Leer el IMEI!');
-			};
-			permissions.requestPermission(
-			  permissions.READ_PHONE_STATE,
-			  function(status) {
-				if(!status.hasPermission) errorCallback();
-			  },
-			  errorCallback);
-		  }else{
-				app.getImei();	
-			}
-		}
+		app.getImei();
+		var cicloIMEI = setInterval(function(){
+			console.log("setInterval getImei");
+			if(app.imei=="") app.getImei();
+			else window.clearInterval(cicloIMEI);
+		}, 10*1000); 
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -57,8 +41,7 @@ var app = {
     },
 	enviar: function(parametros){
 		var urlEnvio = 'http://'+localStorage.url_servidor+'/SIG/servicios/m123/m123_geopos_SRV_BGv2.php';
-			console.log(urlEnvio);
-			console.log(parametros.imei); 	//alert(parametros);
+			console.log("Tipo: "+parametros.tipo+" / "+urlEnvio);	//console.log(parametros.dir); 	//alert(parametros);
 		$.ajax({
 			headers:  parametros,
 			url: urlEnvio,
@@ -87,11 +70,34 @@ var app = {
 		   //Obtiene el IMEI
 		   res = result.split("deviceID");
 		   res = res[1].split('"');
-		   app.imei = res[2]; console.log("GET Imei: "+app.imei);
+		   app.imei = res[2]; console.log("SET Imei: "+app.imei);
+		   //CON IMEI INICIALIZA EL SERVICIO DE BACKGROUND
 		   app.iniGeoBackground(app.imei);
+		   
 		   }, function(error) {
 				console.log("Error: " + error);
 				console.log("Habilite los permisos en su aplicación");
+				try {
+					var permissions = cordova.plugins.permissions;
+					permissions.hasPermission(permissions.READ_PHONE_STATE, checkPermissionCallback, null);
+				}
+				catch(err) {
+					console.log(err.message);
+				}
+				function checkPermissionCallback(status) {
+				  if(!status.hasPermission) { //VERIFICA SI TIENE PERMISO IMEI
+					var errorCallback = function() {
+						console.warn('No tiene permisos de Leer el IMEI!');
+					};
+					//PREGUNTA EL PERMISO DEL IME
+					permissions.requestPermission(
+					  permissions.READ_PHONE_STATE,
+					  function(status) {
+						if(!status.hasPermission) errorCallback();
+					  },
+					  errorCallback);
+				  }
+				}
 		   });
 	},
 	iniGeoBackground: function (imei){
@@ -157,11 +163,11 @@ var app = {
 			
 			var parametros = new Object();
 				parametros['imei'] = imei;
-				parametros['longitud'] = location.longitude;
-				parametros['latitud'] = location.latitude;
-				parametros['exactitud'] = location.accuracy;
-				parametros['velocidad'] = location.speed;
-				parametros['direccion'] = location.bearing;		
+				parametros['lon'] = location.longitude;
+				parametros['lat'] = location.latitude;
+				parametros['exac'] = location.accuracy;
+				parametros['vel'] = location.speed;
+				parametros['dir'] = location.bearing;		
 				parametros['fechacaptura'] = timestamp;
 				parametros['tipo'] = '3';
 				app.enviar(parametros);
@@ -176,20 +182,18 @@ var app = {
 		var failureFn = function(error) {
 			console.log('BackgroundGeolocation error');
 		};
-		
+		console.log("Configura IMEI:" + imei);
 		backgroundGeolocation.configure(callbackFn, failureFn, {
-			debug: true,
+			//debug: true,
 			desiredAccuracy: 10,
 			stationaryRadius: 20,
 			distanceFilter: 30,
 			url: 'http://saga.cundinamarca.gov.co/SIG/servicios/m123/m123_geopos_SRV_BGv2.php',
-			httpHeaders: { imei: imei },
+			httpHeaders: { imei: imei,tipo : 1 },
 			maxLocations: 1000,
 			// Android only section
 			locationProvider: backgroundGeolocation.provider.ANDROID_DISTANCE_FILTER_PROVIDER,
-			interval: 60*1000,
-			fastestInterval: 5000,
-			activitiesInterval: 10000,
+			interval: 60000,
 			notificationTitle: 'Background tracking',
 			notificationText: 'enabled',
 			notificationIconColor: '#FEDD1E',
